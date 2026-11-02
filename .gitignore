@@ -1,0 +1,16 @@
+# Dependencias
+node_modules/
+
+# Cache de ferramentas
+.cache/
+assets/remaster/raw/.cache/
+assets/remaster/raw/descartadas/
+
+# Arquivos de sistema e SO
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Snaps e capturas temporarias
+snaps/
+*.tmp

@@ -1,0 +1,25 @@
+{
+ "sprites": [
+  "bridge",
+  "fuel",
+  "heli_l1",
+  "heli_l2",
+  "heli_r1",
+  "heli_r2",
+  "house_a",
+  "house_b",
+  "jet_l",
+  "jet_r",
+  "player",
+  "player_left",
+  "player_right",
+  "ship_l",
+  "ship_r"
+ ],
+ "textures": [
+  "water",
+  "rock",
+  "jungle"
+ ],
+ "panel": false
+}

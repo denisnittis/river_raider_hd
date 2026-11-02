@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d1016">
+<title>River Raid Remaster HD</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #0d1016;
+    --fg: #d9dee8;
+    --muted: #8790a0;
+    --accent: #f2c94c;
+    --accent-glow: rgba(242, 201, 76, 0.4);
+    --fire: #ff4757;
+    --fire-dark: #b31e2b;
+    --fire-glow: rgba(255, 71, 87, 0.5);
+    --panel-bg: rgba(22, 27, 36, 0.85);
+    --btn-bg: #1d2430;
+    --btn-border: #333c4c;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow-x: hidden;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    width: 100%;
+    max-width: 1280px;
+    z-index: 10;
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-size: 16px;
+    margin: 0;
+    letter-spacing: .06em;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  h1 span { color: var(--accent); }
+
+  #status {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 500px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  button {
+    background: var(--btn-bg);
+    color: var(--fg);
+    border: 1px solid var(--btn-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s, border-color 0.15s, transform 0.08s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  button:hover { border-color: var(--accent); }
+  button:active { transform: scale(0.96); }
+
+  #wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 12px;
+    flex-shrink: 1;
+    position: relative;
+  }
+
+  /* Game Canvas */
+  canvas {
+    width: min(100%, 1400px, calc((100vh - 270px) * 1280 / 796));
+    aspect-ratio: 1280 / 796;
+    display: block;
+    background: #000;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    touch-action: none;
+  }
+
+  /* Fullscreen adjustments */
+  :fullscreen canvas, #wrap:fullscreen canvas {
+    width: min(100vw, 100vh * 1280 / 796);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  #wrap:fullscreen {
+    background: #000;
+    align-items: center;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* ========================================================
+     VIRTUAL TOUCH CONTROLS (CELULAR / MOBILE GAMEPAD)
+     ======================================================== */
+  #touch-controls {
+    width: 100%;
+    max-width: 1000px;
+    padding: 8px 16px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    z-index: 20;
+  }
+
+  /* Hide touch controls if explicitly toggled off on desktop */
+  body.hide-touch-ui #touch-controls {
+    display: none !important;
+  }
+
+  /* D-PAD */
+  .dpad-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .dpad-base {
+    width: 156px;
+    height: 156px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #202735 0%, #11151e 100%);
+    border: 3px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 2px 6px rgba(255, 255, 255, 0.08);
+    position: relative;
+    touch-action: none;
+    cursor: pointer;
+  }
+
+  /* Cross background inside dpad */
+  .dpad-cross {
+    position: absolute;
+    inset: 18px;
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .dpad-cross::before, .dpad-cross::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+  }
+  .dpad-cross::before {
+    top: 0; bottom: 0; left: 34%; right: 34%;
+  }
+  .dpad-cross::after {
+    left: 0; right: 0; top: 34%; bottom: 34%;
+  }
+
+  /* D-pad Arrows */
+  .dpad-arrow {
+    position: absolute;
+    color: var(--muted);
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: color 0.1s, transform 0.1s, filter 0.1s;
+    line-height: 1;
+  }
+  .dpad-arrow span.hint {
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+  .dpad-arrow.active {
+    color: var(--accent);
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+    transform: scale(1.2);
+  }
+
+  #dpad-up { top: 8px; left: 50%; transform: translateX(-50%); }
+  #dpad-up.active { transform: translateX(-50%) scale(1.2); }
+  
+  #dpad-down { bottom: 8px; left: 50%; transform: translateX(-50%); }
+  #dpad-down.active { transform: translateX(-50%) scale(1.2); }
+  
+  #dpad-left { left: 8px; top: 50%; transform: translateY(-50%); }
+  #dpad-left.active { transform: translateY(-50%) scale(1.2); }
+  
+  #dpad-right { right: 8px; top: 50%; transform: translateY(-50%); }
+  #dpad-right.active { transform: translateY(-50%) scale(1.2); }
+
+  /* Floating Thumb Stick */
+  .dpad-stick {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #3c485c 0%, #181e28 100%);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+    transition: transform 0.06s ease-out;
+  }
+
+  /* CENTER SYSTEM / CONSOLE BUTTONS */
+  .console-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 320px;
+  }
+
+  .main-console-btns {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-arcade-start {
+    background: linear-gradient(180deg, #f7d358 0%, #d49511 100%);
+    color: #111;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: .08em;
+    padding: 10px 18px;
+    border-radius: 20px;
+    border: 2px solid #ffe685;
+    box-shadow: 0 4px 12px rgba(242, 201, 76, 0.35), inset 0 2px 3px rgba(255,255,255,0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .btn-arcade-start:active, .btn-arcade-start.active {
+    transform: scale(0.93) translateY(2px);
+    box-shadow: 0 1px 6px rgba(242, 201, 76, 0.6);
+    background: linear-gradient(180deg, #d49511 0%, #b87e08 100%);
+  }
+
+  .btn-arcade-select {
+    background: linear-gradient(180deg, #2b3545 0%, #171c26 100%);
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: 10px 16px;
+    border-radius: 20px;
+    border: 2px solid #3c485c;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    cursor: pointer;
+  }
+  .btn-arcade-select:active, .btn-arcade-select.active {
+    transform: scale(0.93) translateY(2px);
+    border-color: var(--accent);
+  }
+
+  /* Quick Utility Buttons (Som, Modo, Pausa, Fullscreen) */
+  .quick-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .quick-btn {
+    background: rgba(29, 36, 48, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 5px 9px;
+    font-size: 11px;
+    color: var(--fg);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .quick-btn.active {
+    background: var(--accent);
+    color: #111;
+    border-color: var(--accent);
+    font-weight: bold;
+  }
+  .quick-btn.muted {
+    opacity: 0.6;
+    border-color: #e74c3c;
+  }
+
+  /* FIRE BUTTON (ACTION) */
+  .fire-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-fire {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff5252 0%, #b71523 100%);
+    border: 3px solid #ff7b7b;
+    color: #fff;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: .08em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px var(--fire-glow), inset 0 3px 6px rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.08s, box-shadow 0.08s, filter 0.08s;
+  }
+  .btn-fire span.fire-icon {
+    font-size: 20px;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .btn-fire.active, .btn-fire:active {
+    transform: scale(0.91) translateY(2px);
+    background: radial-gradient(circle at 35% 35%, #e01122 0%, #850c16 100%);
+    box-shadow: 0 3px 12px var(--fire-glow), inset 0 4px 8px rgba(0, 0, 0, 0.5);
+    filter: brightness(1.2);
+  }
+
+  /* ========================================================
+     RESPONSIVE ADAPTATIONS (MOBILE PORTRAIT / LANDSCAPE)
+     ======================================================== */
+  @media (max-width: 600px) {
+    header { padding: 6px 12px; }
+    h1 { font-size: 14px; }
+    #status { display: none; }
+    
+    #wrap { padding: 0 4px 4px; }
+    canvas {
+      width: 100%;
+      border-radius: 4px;
+    }
+
+    #touch-controls {
+      padding: 6px 8px 12px;
+      gap: 8px;
+    }
+
+    .dpad-base {
+      width: 136px;
+      height: 136px;
+    }
+    .dpad-stick {
+      width: 46px;
+      height: 46px;
+    }
+    .btn-fire {
+      width: 78px;
+      height: 78px;
+      font-size: 14px;
+    }
+    .btn-arcade-start {
+      padding: 8px 14px;
+      font-size: 12px;
+    }
+    .btn-arcade-select {
+      padding: 8px 12px;
+      font-size: 11px;
+    }
+    .quick-btn {
+      padding: 4px 7px;
+      font-size: 10px;
+    }
+  }
+
+  /* LANDSCAPE ON PHONES: overlay controls on sides so screen fills viewport */
+  @media (orientation: landscape) and (max-height: 540px) {
+    header {
+      padding: 2px 10px;
+      gap: 6px;
+    }
+    h1 { font-size: 13px; }
+    #status { display: none; }
+    
+    #wrap {
+      padding: 0;
+      flex: 1;
+      height: calc(100vh - 32px);
+      align-items: center;
+    }
+    canvas {
+      height: 100%;
+      width: auto;
+      max-width: 100vw;
+      border-radius: 0;
+    }
+
+    #touch-controls {
+      position: fixed;
+      inset: 0;
+      max-width: none;
+      padding: 0 16px 10px;
+      pointer-events: none;
+      align-items: flex-end;
+      z-index: 50;
+    }
+
+    .dpad-container, .fire-container, .console-panel {
+      pointer-events: auto;
+    }
+
+    .dpad-base {
+      width: 124px;
+      height: 124px;
+      background: radial-gradient(circle at 40% 40%, rgba(32, 39, 53, 0.75) 0%, rgba(17, 21, 30, 0.85) 100%);
+      backdrop-filter: blur(4px);
+    }
+    .btn-fire {
+      width: 76px;
+      height: 76px;
+      opacity: 0.9;
+    }
+    .console-panel {
+      position: fixed;
+      top: 4px;
+      right: 12px;
+      flex-direction: row;
+      gap: 6px;
+    }
+    .main-console-btns {
+      width: auto;
+      gap: 6px;
+    }
+    .btn-arcade-start {
+      padding: 5px 12px;
+      font-size: 11px;
+    }
+    .btn-arcade-select {
+      padding: 5px 10px;
+      font-size: 10px;
+    }
+    .quick-bar {
+      width: auto;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>RIVER RAID <span>REMASTER</span></h1>
+    <div id="status">Carregando…</div>
+  </div>
+  <div class="header-actions">
+    <input type="file" id="romfile" accept=".a26,.bin" hidden>
+    <button id="mode" title="Tecla H">Remaster</button>
+    <button id="toggle-touch-btn" title="Mostrar/Ocultar controles touch na tela" style="display:none;">🎮 Touch</button>
+  </div>
+</header>
+
+<div id="wrap">
+  <canvas id="screen"></canvas>
+</div>
+
+<!-- ========================================================
+     CONTROLES VIRTUAIS PARA CELULAR (TOUCH / GAMEPAD)
+     ======================================================== -->
+<div id="touch-controls" role="region" aria-label="Controles Virtuais Touch">
+  <!-- D-PAD ESQUERDA -->
+  <div class="dpad-container">
+    <div id="dpad" class="dpad-base" title="Deslize o polegar para pilotar">
+      <div class="dpad-cross"></div>
+      <div id="dpad-up" class="dpad-arrow">▲<span class="hint">ACELERA</span></div>
+      <div id="dpad-down" class="dpad-arrow">▼<span class="hint">FREIA</span></div>
+      <div id="dpad-left" class="dpad-arrow">◀</div>
+      <div id="dpad-right" class="dpad-arrow">▶</div>
+      <div id="dpad-stick" class="dpad-stick"></div>
+    </div>
+  </div>
+
+  <!-- CENTRO: SISTEMA ATARI & AÇÕES RÁPIDAS -->
+  <div class="console-panel">
+    <div class="main-console-btns">
+      <button id="btn-start" class="btn-arcade-start" title="Começar ou reiniciar partida">▶ START / RESET</button>
+      <button id="btn-select" class="btn-arcade-select" title="Opções de jogo Atari">SELECT</button>
+    </div>
+    <div class="quick-bar">
+      <button id="btn-mode-touch" class="quick-btn" title="Alternar visual Remaster / Retro">✨ HD</button>
+      <button id="btn-sound-touch" class="quick-btn" title="Ligar ou desligar áudio">🔊 Som</button>
+      <button id="btn-pause-touch" class="quick-btn" title="Pausar o jogo">⏸ Pausa</button>
+      <button id="btn-fs-touch" class="quick-btn" title="Modo tela cheia">⛶ Cheia</button>
+    </div>
+  </div>
+
+  <!-- DIREITA: BOTÃO DE TIRO (FIRE) -->
+  <div class="fire-container">
+    <button id="btn-fire" class="btn-fire" title="Disparar mísseis">
+      <span class="fire-icon">⚡</span>
+      <span>FIRE</span>
+    </button>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
