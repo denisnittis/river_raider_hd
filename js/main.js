@@ -102,7 +102,7 @@ function toggleFullscreen() {
     if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
   } else {
-    const el = document.getElementById('wrap') || document.documentElement;
+    const el = document.getElementById('game-stage') || document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   }

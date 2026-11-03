@@ -15,53 +15,57 @@
     --fg: #d9dee8;
     --muted: #8790a0;
     --accent: #f2c94c;
-    --accent-glow: rgba(242, 201, 76, 0.4);
+    --accent-glow: rgba(242, 201, 76, 0.45);
     --fire: #ff4757;
     --fire-dark: #b31e2b;
-    --fire-glow: rgba(255, 71, 87, 0.5);
-    --panel-bg: rgba(22, 27, 36, 0.85);
+    --fire-glow: rgba(255, 71, 87, 0.6);
     --btn-bg: #1d2430;
     --btn-border: #333c4c;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   
-  body {
+  html, body {
     margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
     background: var(--bg);
     color: var(--fg);
     font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    min-height: 100dvh;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
-    overflow-x: hidden;
+    overflow: hidden;
   }
 
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Header (visível no desktop e celular vertical) */
   header {
     display: flex;
     flex-wrap: wrap;
     gap: 8px 14px;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 16px;
+    padding: 6px 16px;
     width: 100%;
     max-width: 1280px;
+    flex-shrink: 0;
     z-index: 10;
   }
   
   .header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 10px;
   }
 
   h1 {
-    font-size: 16px;
+    font-size: 15px;
     margin: 0;
     letter-spacing: .06em;
     font-weight: 800;
@@ -71,11 +75,11 @@
 
   #status {
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 500px;
+    max-width: 480px;
   }
 
   .header-actions {
@@ -89,59 +93,54 @@
     color: var(--fg);
     border: 1px solid var(--btn-border);
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     cursor: pointer;
     font: inherit;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    transition: background 0.15s, border-color 0.15s, transform 0.08s;
     user-select: none;
     -webkit-user-select: none;
   }
-  button:hover { border-color: var(--accent); }
   button:active { transform: scale(0.96); }
+
+  /* GAME STAGE (O palco do jogo que agrupa Canvas + Controles em Fullscreen) */
+  #game-stage {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
 
   #wrap {
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 0 12px;
+    align-items: center;
+    padding: 0 8px;
     flex-shrink: 1;
-    position: relative;
   }
 
-  /* Game Canvas */
   canvas {
-    width: min(100%, 1400px, calc((100vh - 270px) * 1280 / 796));
+    width: min(100%, 1400px, calc((100vh - 280px) * 1280 / 796));
     aspect-ratio: 1280 / 796;
     display: block;
     background: #000;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
     touch-action: none;
   }
 
-  /* Fullscreen adjustments */
-  :fullscreen canvas, #wrap:fullscreen canvas {
-    width: min(100vw, 100vh * 1280 / 796);
-    border-radius: 0;
-    box-shadow: none;
-  }
-  #wrap:fullscreen {
-    background: #000;
-    align-items: center;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-  }
-
   /* ========================================================
-     VIRTUAL TOUCH CONTROLS (CELULAR / MOBILE GAMEPAD)
+     CONTROLES VIRTUAIS (TOUCH PAD)
      ======================================================== */
   #touch-controls {
     width: 100%;
-    max-width: 1000px;
-    padding: 8px 16px 16px;
+    max-width: 960px;
+    padding: 8px 16px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -150,11 +149,7 @@
     user-select: none;
     -webkit-user-select: none;
     z-index: 20;
-  }
-
-  /* Hide touch controls if explicitly toggled off on desktop */
-  body.hide-touch-ui #touch-controls {
-    display: none !important;
+    flex-shrink: 0;
   }
 
   /* D-PAD */
@@ -163,41 +158,36 @@
     flex-direction: column;
     align-items: center;
     position: relative;
+    touch-action: none;
   }
 
   .dpad-base {
-    width: 156px;
-    height: 156px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     background: radial-gradient(circle at 40% 40%, #202735 0%, #11151e 100%);
-    border: 3px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 2px 6px rgba(255, 255, 255, 0.08);
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 2px 6px rgba(255, 255, 255, 0.08);
     position: relative;
     touch-action: none;
     cursor: pointer;
   }
 
-  /* Cross background inside dpad */
   .dpad-cross {
     position: absolute;
     inset: 18px;
-    border-radius: 12px;
+    border-radius: 10px;
     pointer-events: none;
   }
   .dpad-cross::before, .dpad-cross::after {
     content: '';
     position: absolute;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
   }
-  .dpad-cross::before {
-    top: 0; bottom: 0; left: 34%; right: 34%;
-  }
-  .dpad-cross::after {
-    left: 0; right: 0; top: 34%; bottom: 34%;
-  }
+  .dpad-cross::before { top: 0; bottom: 0; left: 34%; right: 34%; }
+  .dpad-cross::after { left: 0; right: 0; top: 34%; bottom: 34%; }
 
-  /* D-pad Arrows */
   .dpad-arrow {
     position: absolute;
     color: var(--muted);
@@ -208,7 +198,7 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    transition: color 0.1s, transform 0.1s, filter 0.1s;
+    transition: color 0.1s, transform 0.1s;
     line-height: 1;
   }
   .dpad-arrow span.hint {
@@ -235,11 +225,10 @@
   #dpad-right { right: 8px; top: 50%; transform: translateY(-50%); }
   #dpad-right.active { transform: translateY(-50%) scale(1.2); }
 
-  /* Floating Thumb Stick */
   .dpad-stick {
     position: absolute;
-    width: 54px;
-    height: 54px;
+    width: 52px;
+    height: 52px;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -248,22 +237,22 @@
     border: 2px solid rgba(255, 255, 255, 0.25);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.15);
     pointer-events: none;
-    transition: transform 0.06s ease-out;
+    transition: transform 0.05s ease-out;
   }
 
-  /* CENTER SYSTEM / CONSOLE BUTTONS */
+  /* PAINEL CENTRAL (START / SELECT / UTILITÁRIOS) */
   .console-panel {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     flex: 1;
-    max-width: 320px;
+    max-width: 300px;
   }
 
   .main-console-btns {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
     justify-content: center;
   }
@@ -272,34 +261,28 @@
     background: linear-gradient(180deg, #f7d358 0%, #d49511 100%);
     color: #111;
     font-weight: 800;
-    font-size: 13px;
+    font-size: 12px;
     letter-spacing: .08em;
     padding: 10px 18px;
     border-radius: 20px;
     border: 2px solid #ffe685;
-    box-shadow: 0 4px 12px rgba(242, 201, 76, 0.35), inset 0 2px 3px rgba(255,255,255,0.6);
+    box-shadow: 0 4px 12px rgba(242, 201, 76, 0.35);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
   }
   .btn-arcade-start:active, .btn-arcade-start.active {
     transform: scale(0.93) translateY(2px);
-    box-shadow: 0 1px 6px rgba(242, 201, 76, 0.6);
     background: linear-gradient(180deg, #d49511 0%, #b87e08 100%);
   }
 
   .btn-arcade-select {
     background: linear-gradient(180deg, #2b3545 0%, #171c26 100%);
     color: var(--fg);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: .06em;
-    padding: 10px 16px;
+    padding: 10px 14px;
     border-radius: 20px;
     border: 2px solid #3c485c;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     cursor: pointer;
   }
   .btn-arcade-select:active, .btn-arcade-select.active {
@@ -307,25 +290,20 @@
     border-color: var(--accent);
   }
 
-  /* Quick Utility Buttons (Som, Modo, Pausa, Fullscreen) */
   .quick-bar {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
     justify-content: center;
-    width: 100%;
   }
 
   .quick-btn {
     background: rgba(29, 36, 48, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 6px;
-    padding: 5px 9px;
+    padding: 5px 8px;
     font-size: 11px;
     color: var(--fg);
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
     cursor: pointer;
   }
   .quick-btn.active {
@@ -339,17 +317,18 @@
     border-color: #e74c3c;
   }
 
-  /* FIRE BUTTON (ACTION) */
+  /* BOTÃO FIRE (TIRO) */
   .fire-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    touch-action: none;
   }
 
   .btn-fire {
-    width: 90px;
-    height: 90px;
+    width: 88px;
+    height: 88px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 35%, #ff5252 0%, #b71523 100%);
     border: 3px solid #ff7b7b;
@@ -364,9 +343,6 @@
     box-shadow: 0 8px 24px var(--fire-glow), inset 0 3px 6px rgba(255, 255, 255, 0.4);
     cursor: pointer;
     touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-    transition: transform 0.08s, box-shadow 0.08s, filter 0.08s;
   }
   .btn-fire span.fire-icon {
     font-size: 20px;
@@ -376,125 +352,134 @@
   .btn-fire.active, .btn-fire:active {
     transform: scale(0.91) translateY(2px);
     background: radial-gradient(circle at 35% 35%, #e01122 0%, #850c16 100%);
-    box-shadow: 0 3px 12px var(--fire-glow), inset 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 10px var(--fire-glow);
     filter: brightness(1.2);
   }
 
   /* ========================================================
-     RESPONSIVE ADAPTATIONS (MOBILE PORTRAIT / LANDSCAPE)
+     MODO HORIZONTAL (LANDSCAPE) E TELA CHEIA (FULLSCREEN)
+     Experiência estilo console portátil (Switch / Game Boy)
      ======================================================== */
-  @media (max-width: 600px) {
-    header { padding: 6px 12px; }
-    h1 { font-size: 14px; }
-    #status { display: none; }
-    
-    #wrap { padding: 0 4px 4px; }
-    canvas {
-      width: 100%;
-      border-radius: 4px;
-    }
-
-    #touch-controls {
-      padding: 6px 8px 12px;
-      gap: 8px;
-    }
-
-    .dpad-base {
-      width: 136px;
-      height: 136px;
-    }
-    .dpad-stick {
-      width: 46px;
-      height: 46px;
-    }
-    .btn-fire {
-      width: 78px;
-      height: 78px;
-      font-size: 14px;
-    }
-    .btn-arcade-start {
-      padding: 8px 14px;
-      font-size: 12px;
-    }
-    .btn-arcade-select {
-      padding: 8px 12px;
-      font-size: 11px;
-    }
-    .quick-btn {
-      padding: 4px 7px;
-      font-size: 10px;
-    }
-  }
-
-  /* LANDSCAPE ON PHONES: overlay controls on sides so screen fills viewport */
-  @media (orientation: landscape) and (max-height: 540px) {
+  @media (orientation: landscape), (min-aspect-ratio: 1.2 and max-height: 600px) {
     header {
-      padding: 2px 10px;
-      gap: 6px;
+      display: none !important;
     }
-    h1 { font-size: 13px; }
-    #status { display: none; }
-    
-    #wrap {
+
+    #game-stage {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      background: #000;
+      justify-content: center;
+      align-items: center;
       padding: 0;
-      flex: 1;
-      height: calc(100vh - 32px);
+      margin: 0;
+    }
+
+    #wrap {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      padding: 0;
+      display: flex;
+      justify-content: center;
       align-items: center;
     }
+
     canvas {
-      height: 100%;
+      height: 100vh;
+      height: 100dvh;
       width: auto;
       max-width: 100vw;
+      aspect-ratio: 1280 / 796;
       border-radius: 0;
+      box-shadow: none;
     }
 
+    /* Controles flutuantes sobrepostos nas laterais */
     #touch-controls {
-      position: fixed;
+      position: absolute;
       inset: 0;
       max-width: none;
-      padding: 0 16px 10px;
+      padding: 0 20px 16px;
       pointer-events: none;
+      display: flex;
+      justify-content: space-between;
       align-items: flex-end;
-      z-index: 50;
+      z-index: 100;
     }
 
-    .dpad-container, .fire-container, .console-panel {
+    .dpad-container, .fire-container {
       pointer-events: auto;
     }
 
+    /* D-pad no canto inferior esquerdo */
     .dpad-base {
-      width: 124px;
-      height: 124px;
-      background: radial-gradient(circle at 40% 40%, rgba(32, 39, 53, 0.75) 0%, rgba(17, 21, 30, 0.85) 100%);
-      backdrop-filter: blur(4px);
+      width: 130px;
+      height: 130px;
+      background: radial-gradient(circle at 40% 40%, rgba(32, 39, 53, 0.85) 0%, rgba(17, 21, 30, 0.95) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
     }
+    .dpad-stick {
+      width: 44px;
+      height: 44px;
+    }
+
+    /* Botão Fire no canto inferior direito */
     .btn-fire {
-      width: 76px;
-      height: 76px;
-      opacity: 0.9;
+      width: 82px;
+      height: 82px;
+      opacity: 0.92;
+      box-shadow: 0 4px 20px var(--fire-glow);
     }
+
+    /* Barra superior com botões de console discretos */
     .console-panel {
-      position: fixed;
-      top: 4px;
-      right: 12px;
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
       flex-direction: row;
-      gap: 6px;
+      gap: 8px;
+      pointer-events: auto;
+      max-width: none;
+      background: rgba(13, 16, 22, 0.8);
+      backdrop-filter: blur(8px);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
     .main-console-btns {
       width: auto;
-      gap: 6px;
+      gap: 8px;
     }
     .btn-arcade-start {
-      padding: 5px 12px;
+      padding: 4px 12px;
       font-size: 11px;
     }
     .btn-arcade-select {
-      padding: 5px 10px;
+      padding: 4px 10px;
       font-size: 10px;
     }
     .quick-bar {
       width: auto;
+      gap: 4px;
     }
+    .quick-btn {
+      padding: 3px 7px;
+      font-size: 10px;
+    }
+  }
+
+  /* Quando ativado Fullscreen pela API do navegador */
+  :fullscreen #game-stage, #game-stage:fullscreen,
+  :-webkit-full-screen #game-stage, #game-stage:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
   }
 </style>
 </head>
@@ -508,50 +493,50 @@
   <div class="header-actions">
     <input type="file" id="romfile" accept=".a26,.bin" hidden>
     <button id="mode" title="Tecla H">Remaster</button>
-    <button id="toggle-touch-btn" title="Mostrar/Ocultar controles touch na tela" style="display:none;">🎮 Touch</button>
   </div>
 </header>
 
-<div id="wrap">
-  <canvas id="screen"></canvas>
-</div>
-
-<!-- ========================================================
-     CONTROLES VIRTUAIS PARA CELULAR (TOUCH / GAMEPAD)
-     ======================================================== -->
-<div id="touch-controls" role="region" aria-label="Controles Virtuais Touch">
-  <!-- D-PAD ESQUERDA -->
-  <div class="dpad-container">
-    <div id="dpad" class="dpad-base" title="Deslize o polegar para pilotar">
-      <div class="dpad-cross"></div>
-      <div id="dpad-up" class="dpad-arrow">▲<span class="hint">ACELERA</span></div>
-      <div id="dpad-down" class="dpad-arrow">▼<span class="hint">FREIA</span></div>
-      <div id="dpad-left" class="dpad-arrow">◀</div>
-      <div id="dpad-right" class="dpad-arrow">▶</div>
-      <div id="dpad-stick" class="dpad-stick"></div>
-    </div>
+<!-- STAGE DO JOGO: agrupa a tela e os botões virtuais -->
+<div id="game-stage">
+  <div id="wrap">
+    <canvas id="screen"></canvas>
   </div>
 
-  <!-- CENTRO: SISTEMA ATARI & AÇÕES RÁPIDAS -->
-  <div class="console-panel">
-    <div class="main-console-btns">
-      <button id="btn-start" class="btn-arcade-start" title="Começar ou reiniciar partida">▶ START / RESET</button>
-      <button id="btn-select" class="btn-arcade-select" title="Opções de jogo Atari">SELECT</button>
+  <!-- CONTROLES VIRTUAIS (TOUCH GAMEPAD) -->
+  <div id="touch-controls" role="region" aria-label="Controles Virtuais Touch">
+    <!-- D-PAD ESQUERDA -->
+    <div class="dpad-container">
+      <div id="dpad" class="dpad-base" title="Deslize o polegar para pilotar">
+        <div class="dpad-cross"></div>
+        <div id="dpad-up" class="dpad-arrow">▲<span class="hint">ACELERA</span></div>
+        <div id="dpad-down" class="dpad-arrow">▼<span class="hint">FREIA</span></div>
+        <div id="dpad-left" class="dpad-arrow">◀</div>
+        <div id="dpad-right" class="dpad-arrow">▶</div>
+        <div id="dpad-stick" class="dpad-stick"></div>
+      </div>
     </div>
-    <div class="quick-bar">
-      <button id="btn-mode-touch" class="quick-btn" title="Alternar visual Remaster / Retro">✨ HD</button>
-      <button id="btn-sound-touch" class="quick-btn" title="Ligar ou desligar áudio">🔊 Som</button>
-      <button id="btn-pause-touch" class="quick-btn" title="Pausar o jogo">⏸ Pausa</button>
-      <button id="btn-fs-touch" class="quick-btn" title="Modo tela cheia">⛶ Cheia</button>
-    </div>
-  </div>
 
-  <!-- DIREITA: BOTÃO DE TIRO (FIRE) -->
-  <div class="fire-container">
-    <button id="btn-fire" class="btn-fire" title="Disparar mísseis">
-      <span class="fire-icon">⚡</span>
-      <span>FIRE</span>
-    </button>
+    <!-- PAINEL DE CONSOLE (CENTRO NA VERTICAL / TOPO NA HORIZONTAL) -->
+    <div class="console-panel">
+      <div class="main-console-btns">
+        <button id="btn-start" class="btn-arcade-start" title="Começar ou reiniciar partida">▶ START</button>
+        <button id="btn-select" class="btn-arcade-select" title="Opções de jogo Atari">SELECT</button>
+      </div>
+      <div class="quick-bar">
+        <button id="btn-mode-touch" class="quick-btn" title="Alternar visual Remaster / Retro">✨ HD</button>
+        <button id="btn-sound-touch" class="quick-btn" title="Ligar ou desligar áudio">🔊 Som</button>
+        <button id="btn-pause-touch" class="quick-btn" title="Pausar o jogo">⏸ Pausa</button>
+        <button id="btn-fs-touch" class="quick-btn" title="Tela cheia">⛶ Cheia</button>
+      </div>
+    </div>
+
+    <!-- BOTÃO FIRE DIREITA -->
+    <div class="fire-container">
+      <button id="btn-fire" class="btn-fire" title="Disparar mísseis">
+        <span class="fire-icon">⚡</span>
+        <span>FIRE</span>
+      </button>
+    </div>
   </div>
 </div>
 
