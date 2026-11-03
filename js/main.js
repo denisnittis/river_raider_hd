@@ -96,17 +96,40 @@ function toggleMute() {
   return audio.muted;
 }
 
+function updateFsButton() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('fullscreen-mode'));
+  const btnFs = document.getElementById('btn-fs-touch');
+  if (btnFs) {
+    btnFs.textContent = isFs ? '🗗 Sair' : '⛶ Cheia';
+    btnFs.classList.toggle('active', isFs);
+  }
+}
+
 function toggleFullscreen() {
-  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('fullscreen-mode'));
   if (isFs) {
+    document.body.classList.remove('fullscreen-mode');
     if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
   } else {
+    document.body.classList.add('fullscreen-mode');
     const el = document.getElementById('game-stage') || document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   }
+  updateFsButton();
 }
+
+document.addEventListener('fullscreenchange', () => {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  if (!isFs) document.body.classList.remove('fullscreen-mode');
+  updateFsButton();
+});
+document.addEventListener('webkitfullscreenchange', () => {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  if (!isFs) document.body.classList.remove('fullscreen-mode');
+  updateFsButton();
+});
 
 function triggerReset() {
   latched.set('reset', 8);
@@ -126,19 +149,6 @@ initTouchControls({
   onReset: triggerReset,
   onSelect: triggerSelect,
 });
-
-// Desktop toggle button for touch controls
-const toggleTouchBtn = document.getElementById('toggle-touch-btn');
-if (toggleTouchBtn) {
-  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-  if (!isTouchDevice) {
-    toggleTouchBtn.style.display = 'inline-block';
-    toggleTouchBtn.addEventListener('click', () => {
-      document.body.classList.toggle('hide-touch-ui');
-      toggleTouchBtn.textContent = document.body.classList.contains('hide-touch-ui') ? '🎮 Touch: Off' : '🎮 Touch: On';
-    });
-  }
-}
 
 function draw(time) {
   const frame = machine.tia.out;
