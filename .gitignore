@@ -14,3 +14,7 @@ desktop.ini
 # Snaps e capturas temporarias
 snaps/
 *.tmp
+
+# ROM: protegida por direitos autorais, nao publicar (a pagina pede o arquivo ao jogador)
+roms/
+*.a26

@@ -76,6 +76,13 @@ git push -u origin main
 
 O link funcionará direto tanto no computador quanto no navegador do celular!
 
+**A ROM não vai para o GitHub** (`roms/` está no `.gitignore`, porque o River
+Raid é protegido por direitos autorais). No site, na primeira vez, a página
+pede o arquivo `.a26`: o jogador escolhe a própria ROM, que fica só no
+aparelho dele, e o navegador lembra dela nas próximas vezes. No celular, basta
+copiar o arquivo para o aparelho antes. Jogando localmente pelo `jogar.bat`,
+a ROM da pasta `roms/` é usada direto.
+
 ---
 
 ## 🛠 Como Jogar Localmente

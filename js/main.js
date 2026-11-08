@@ -193,16 +193,49 @@ function boot(bytes) {
   window.machine = machine; window.renderers = renderers;
 }
 
+// The ROM is not published with the site (it is copyrighted): use the local
+// file when there is one, else the copy this browser remembers, else ask.
+const ROM_KEY = 'rom:riverraid';
+const romPick = document.getElementById('rom-pick');
+const romInput = document.getElementById('romfile');
+
+function rememberRom(bytes) {
+  try {
+    let s = '';
+    for (const b of new Uint8Array(bytes)) s += String.fromCharCode(b);
+    localStorage.setItem(ROM_KEY, btoa(s));
+  } catch { /* private mode etc.: it will just ask again next time */ }
+}
+function rememberedRom() {
+  try {
+    const s = localStorage.getItem(ROM_KEY);
+    if (!s) return null;
+    return Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer;
+  } catch { return null; }
+}
+
 fetch('roms/riverraid.a26').then(r => {
   if (!r.ok) throw new Error();
   return r.arrayBuffer();
 }).then(boot).catch(() => {
-  statusEl.textContent = 'Escolha o arquivo da ROM (.a26):';
-  document.getElementById('romfile').hidden = false;
+  const saved = rememberedRom();
+  if (saved) return boot(saved);
+  statusEl.textContent = 'Escolha o arquivo da ROM (.a26) para jogar';
+  romPick.hidden = false;
 });
-document.getElementById('romfile')?.addEventListener('change', async e => {
+document.getElementById('rom-pick-btn')?.addEventListener('click', () => romInput.click());
+romInput?.addEventListener('change', async e => {
   const f = e.target.files[0];
-  if (f) boot(await f.arrayBuffer());
+  if (!f) return;
+  const bytes = await f.arrayBuffer();
+  if (bytes.byteLength !== 2048 && bytes.byteLength !== 4096) {
+    document.getElementById('rom-pick-error').hidden = false;
+    return;
+  }
+  rememberRom(bytes);
+  romPick.hidden = true;
+  audio.start();
+  boot(bytes);
 });
 requestAnimationFrame(loop);
 

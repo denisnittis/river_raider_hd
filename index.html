@@ -548,6 +548,17 @@
   body.fullscreen-mode .right-side {
     align-items: flex-end !important;
   }
+  /* ROM picker over the game screen */
+  #wrap { position: relative; }
+  #rom-pick { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+              background: rgba(5, 10, 20, 0.82); z-index: 20; padding: 16px; }
+  #rom-pick[hidden] { display: none; }
+  .rom-card { max-width: 440px; text-align: center; color: #e8edf5; }
+  .rom-card h2 { margin: 0 0 10px; font-size: 22px; }
+  .rom-card p { margin: 0 0 16px; color: #aab4c3; font-size: 15px; line-height: 1.45; }
+  #rom-pick-btn { font-size: 18px; padding: 12px 28px; border-radius: 10px; border: 0; cursor: pointer;
+                  background: #f2c94c; color: #1b1b1b; font-weight: 700; }
+  #rom-pick-error { color: #ff8a80 !important; margin-top: 12px !important; }
 </style>
 </head>
 <body>
@@ -567,6 +578,16 @@
 <div id="game-stage">
   <div id="wrap">
     <canvas id="screen"></canvas>
+    <!-- shown when the ROM is not on the server (e.g. GitHub Pages) -->
+    <div id="rom-pick" hidden>
+      <div class="rom-card">
+        <h2>Escolha a ROM do River Raid</h2>
+        <p>O jogo usa o seu arquivo <b>.a26</b> do River Raid. Ele fica só neste aparelho:
+          não é enviado para lugar nenhum, e o navegador lembra dele na próxima vez.</p>
+        <button id="rom-pick-btn">Escolher ROM</button>
+        <p id="rom-pick-error" hidden>Esse arquivo não parece uma ROM de Atari 2600 (2 ou 4 KB).</p>
+      </div>
+    </div>
   </div>
 
   <!-- CONTROLES VIRTUAIS (TOUCH GAMEPAD) -->
